@@ -1,0 +1,537 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>IRON MAN // Stark Industries Next-Gen Armor OS</title>
+  <meta name="description" content="Cinematic interactive Iron Man Mark VII Operating System and armor telemetry dashboard by Stark Industries.">
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='45' fill='%23050914' stroke='%2300f0ff' stroke-width='6'/><circle cx='50' cy='50' r='20' fill='%2300f0ff'/></svg>">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+  <!-- Background Canvas & Overlays -->
+  <canvas id="bg-particles"></canvas>
+  <div class="scanline-overlay"></div>
+  <div class="screen-flash" id="screen-flash"></div>
+
+  <!-- STARK INDUSTRIES NAVIGATION -->
+  <header class="stark-header">
+    <a href="#home" class="brand-container" id="nav-brand">
+      <div class="brand-reactor-icon"></div>
+      <div class="brand-text">
+        <span class="brand-title">STARK INDUSTRIES</span>
+        <span class="brand-sub">MARK VII // NEURAL HUD OS</span>
+      </div>
+    </a>
+
+    <ul class="nav-links" id="nav-links-menu">
+      <li><a href="#home" class="nav-link active" id="nav-home">HOME</a></li>
+      <li><a href="#armor" class="nav-link" id="nav-armor">ARMOR</a></li>
+      <li><a href="#systems" class="nav-link" id="nav-systems">SYSTEMS</a></li>
+      <li><a href="#flight" class="nav-link" id="nav-flight">FLIGHT</a></li>
+      <li><a href="#about" class="nav-link" id="nav-about">ABOUT</a></li>
+    </ul>
+
+    <div class="nav-actions">
+      <!-- Audio SFX Toggle -->
+      <button class="audio-toggle-btn" id="audio-toggle" title="Toggle Stark Audio Synthesizer">
+        <div class="eq-bars">
+          <div class="eq-bar"></div>
+          <div class="eq-bar"></div>
+          <div class="eq-bar"></div>
+        </div>
+        <span id="audio-label">SFX: ON</span>
+      </button>
+
+      <!-- Asset Swap Modal Trigger -->
+      <button class="asset-mgr-btn" id="open-asset-modal" title="Swap Suit Image Assets">
+        <span>⚙ ASSETS</span>
+      </button>
+
+      <!-- Mobile Hamburger -->
+      <button class="mobile-toggle" id="mobile-toggle" aria-label="Toggle Navigation">☰</button>
+    </div>
+  </header>
+
+  <!-- 1. HERO SECTION -->
+  <main>
+    <section class="hero-section" id="home">
+      <!-- Left Content Column -->
+      <div class="hero-content">
+        <div class="hero-pretitle">
+          <span class="hud-tag">STARK TACTICAL DEFENSE MATRIX</span>
+          <span class="hud-pill status-offline" id="hero-suit-status">
+            <span class="status-dot"></span>
+            <span id="hero-suit-status-text">GEN 07 • OFFLINE</span>
+          </span>
+        </div>
+
+        <h1 class="hero-title">IRON MAN</h1>
+        <h2 class="hero-subtitle">NEXT-GENERATION ARMOR SYSTEM</h2>
+
+        <p class="hero-description">
+          Engineered by Tony Stark. Mark VII rapid-deployment combat platform featuring high-density micro-fusion arc propulsion, nanotech kinetic deflection plating, and J.A.R.V.I.S. neural telemetry interface.
+        </p>
+
+        <!-- Primary Interactive Action Buttons -->
+        <div class="hero-actions">
+          <button id="btn-activate-suit" class="btn-stark btn-stark-primary">
+            <span>⚡ ACTIVATE SUIT</span>
+          </button>
+          <a href="#armor" id="btn-explore-armor" class="btn-stark btn-stark-outline">
+            <span>🎯 EXPLORE ARMOR</span>
+          </a>
+          <button id="btn-scan-suit" class="btn-stark btn-stark-cyan">
+            <span>🔍 SCAN SUIT</span>
+          </button>
+        </div>
+
+        <!-- Live Diagnostic Mini Terminal -->
+        <div class="diagnostic-terminal stark-panel">
+          <div class="terminal-header">
+            <span>TELEMETRY STREAM // J.A.R.V.I.S. v4.2</span>
+            <span id="terminal-clock">00:00:00 UTC</span>
+          </div>
+          <div class="terminal-logs" id="terminal-logs">
+            <div class="log-entry">[SYS] Standing by. Neural bridge awaiting activation.</div>
+            <div class="log-entry">[PWR] Arc core output: 3.2 GW at standby idle.</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right 3D Visual Stage with Parallax & HUD -->
+      <div class="hero-stage" id="hero-stage">
+        <div class="stage-ambient-glow"></div>
+        <div class="hud-reticle-outer"></div>
+        <div class="hud-reticle-inner"></div>
+
+        <!-- 3D Parallax Suit Container -->
+        <div class="suit-3d-wrapper" id="suit-3d-wrapper">
+          <div class="suit-floating-box" id="suit-floating-box">
+            
+            <!-- Hero Image 1 Asset -->
+            <img 
+              src="assets/hero-ironman.png" 
+              alt="Iron Man Full-Body Flying Suit with Hand Repulsor" 
+              class="suit-hero-img" 
+              id="hero-img-element"
+            >
+
+            <!-- Thruster Flame & Particle Canvas -->
+            <canvas id="thruster-particles"></canvas>
+
+            <!-- Glowing Repulsor & Chest Arc Overlays -->
+            <div class="repulsor-glow-point" id="repulsor-glow-point" title="Hand Repulsor"></div>
+            <div class="chest-arc-glow-point" id="chest-arc-glow-point" title="Chest Arc Reactor"></div>
+
+            <!-- Vertical Scanner Laser Line -->
+            <div class="scanner-laser-line" id="scanner-laser"></div>
+
+            <!-- Scanner Target Annotations -->
+            <div class="scanner-target-marker" id="scan-marker-helmet" style="top: 10%; left: 45%;">
+              <span class="marker-label">HELMET: LOCKED</span>
+            </div>
+            <div class="scanner-target-marker" id="scan-marker-reactor" style="top: 26%; left: 45%;">
+              <span class="marker-label">CORE: 3.2 GW</span>
+            </div>
+            <div class="scanner-target-marker" id="scan-marker-repulsor" style="top: 46%; left: 14%;">
+              <span class="marker-label">REPULSOR: CHARGED</span>
+            </div>
+            <div class="scanner-target-marker" id="scan-marker-flight" style="top: 86%; left: 46%;">
+              <span class="marker-label">THRUSTERS: READY</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- 6 Floating Interactive HUD Metrics around Suit -->
+        <div class="hud-widget hw-power stark-panel" id="hw-power" data-depth="0.15">
+          <div class="hud-widget-title">
+            <span>POWER</span>
+            <span class="hud-widget-status">CORE</span>
+          </div>
+          <div class="hud-widget-value" id="val-power">0%</div>
+          <div class="hud-progress-bar"><div class="hud-progress-fill" id="fill-power"></div></div>
+        </div>
+
+        <div class="hud-widget hw-armor stark-panel" id="hw-armor" data-depth="0.25">
+          <div class="hud-widget-title">
+            <span>ARMOR</span>
+            <span class="hud-widget-status">INTEGRITY</span>
+          </div>
+          <div class="hud-widget-value" id="val-armor">0%</div>
+          <div class="hud-progress-bar"><div class="hud-progress-fill" id="fill-armor"></div></div>
+        </div>
+
+        <div class="hud-widget hw-energy stark-panel" id="hw-energy" data-depth="0.2">
+          <div class="hud-widget-title">
+            <span>ENERGY</span>
+            <span class="hud-widget-status">RESONANCE</span>
+          </div>
+          <div class="hud-widget-value" id="val-energy">0%</div>
+          <div class="hud-progress-bar"><div class="hud-progress-fill" id="fill-energy"></div></div>
+        </div>
+
+        <div class="hud-widget hw-flight stark-panel" id="hw-flight" data-depth="0.3">
+          <div class="hud-widget-title">
+            <span>FLIGHT</span>
+            <span class="hud-widget-status">THRUST</span>
+          </div>
+          <div class="hud-widget-value" id="val-flight">0%</div>
+          <div class="hud-progress-bar"><div class="hud-progress-fill" id="fill-flight"></div></div>
+        </div>
+
+        <div class="hud-widget hw-weapons stark-panel" id="hw-weapons" data-depth="0.18">
+          <div class="hud-widget-title">
+            <span>WEAPONS</span>
+            <span class="hud-widget-status">ORDNANCE</span>
+          </div>
+          <div class="hud-widget-value" id="val-weapons">STANDBY</div>
+          <div class="hud-progress-bar"><div class="hud-progress-fill" id="fill-weapons"></div></div>
+        </div>
+
+        <div class="hud-widget hw-ai stark-panel" id="hw-ai" data-depth="0.22">
+          <div class="hud-widget-title">
+            <span>AI SYSTEM</span>
+            <span class="hud-widget-status">J.A.R.V.I.S.</span>
+          </div>
+          <div class="hud-widget-value" id="val-ai">OFFLINE</div>
+          <div class="hud-progress-bar"><div class="hud-progress-fill" id="fill-ai"></div></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 2. INTERACTIVE ARMOR SHOWCASE SECTION -->
+    <section class="section-container" id="armor">
+      <div class="section-header-block">
+        <span class="hud-tag">MODULAR SPECIFICATIONS</span>
+        <h2 class="section-title">MARK VII ARMOR SHOWCASE</h2>
+        <p class="section-subtitle">
+          Click on any active HUD target on the high-resolution armor chassis below to analyze component blueprints, telemetry, and weapon sub-systems.
+        </p>
+      </div>
+
+      <div class="armor-showcase-grid">
+        <!-- Left: Image 2 Frame with Hotspots -->
+        <div class="armor-display-frame stark-panel">
+          <img 
+            src="assets/armor-ironman.jpg" 
+            alt="Close-up Iron Man Flight Armor Showcase" 
+            class="armor-showcase-img" 
+            id="armor-img-element"
+          >
+
+          <!-- Interactive Clickable Hotspots -->
+          <div class="armor-hotspot hotspot-helmet active" data-component="helmet" title="Analyze Helmet"></div>
+          <div class="armor-hotspot hotspot-reactor" data-component="reactor" title="Analyze Arc Reactor"></div>
+          <div class="armor-hotspot hotspot-repulsor-r" data-component="repulsor" title="Analyze Gauntlet Repulsor"></div>
+          <div class="armor-hotspot hotspot-shoulder" data-component="shoulder" title="Analyze Shoulder Armor"></div>
+          <div class="armor-hotspot hotspot-chest" data-component="chest" title="Analyze Chest Plate"></div>
+          <div class="armor-hotspot hotspot-flight" data-component="flight" title="Analyze Flight Propulsion"></div>
+        </div>
+
+        <!-- Right: Animated Information Panel -->
+        <div class="armor-info-card stark-panel" id="component-card">
+          <div class="comp-badge" id="comp-badge">SUBSYSTEM // MK-01</div>
+          <h3 class="comp-title" id="comp-title">TACTICAL HELMET</h3>
+          <div class="comp-subtitle" id="comp-subtitle">Neural Interface & Retina Holographic HUD</div>
+          <p class="comp-description" id="comp-desc">
+            Constructed from forged 99.4% Titanium-Gold alloy with polarized bulletproof gold visor. Houses the holographic tactical reticle, 360-degree threat perception matrix, and high-bandwidth neural link directly into Tony Stark's synaptics.
+          </p>
+
+          <div class="comp-specs-grid" id="comp-specs">
+            <div class="spec-item">
+              <span class="spec-label">COMPOSITION</span>
+              <span class="spec-value" id="spec-mat">Titanium-Gold Alloy</span>
+            </div>
+            <div class="spec-item">
+              <span class="spec-label">POWER DRAW</span>
+              <span class="spec-value" id="spec-pwr">420 kW</span>
+            </div>
+            <div class="spec-item">
+              <span class="spec-label">DIAGNOSTIC STATUS</span>
+              <span class="spec-value" id="spec-stat" style="color: var(--arc-cyan);">100% NOMINAL</span>
+            </div>
+            <div class="spec-item">
+              <span class="spec-label">TACTICAL ENVELOPE</span>
+              <span class="spec-value" id="spec-cap">Target Lock / 120km</span>
+            </div>
+          </div>
+
+          <div class="comp-interactive-action">
+            <button class="btn-stark btn-stark-cyan" id="btn-test-subsystem">
+              <span>TEST SUBSYSTEM</span>
+            </button>
+            <button class="btn-stark btn-stark-outline" id="btn-cycle-component">
+              <span>NEXT COMPONENT ➔</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 3. ARC REACTOR INTERACTION SECTION -->
+    <section class="section-container reactor-section" id="systems">
+      <div class="section-header-block">
+        <span class="hud-tag">ZERO-POINT POWER GENERATION</span>
+        <h2 class="section-title">ARC REACTOR INTERACTION</h2>
+        <p class="section-subtitle">
+          Tony Stark's patented clean fusion core. Click the reactor core below to initiate power induction, discharge plasma shockwaves, and overcharge suit reserves.
+        </p>
+      </div>
+
+      <div class="reactor-interactive-layout">
+        <!-- Large Glowing Circular Arc Reactor UI Element -->
+        <div class="reactor-core-container" id="reactor-interactive-core" title="Click to Overcharge Arc Reactor">
+          <svg class="reactor-svg-wrapper" viewBox="0 0 400 400">
+            <!-- Outer Armor Ring -->
+            <circle cx="200" cy="200" r="185" fill="none" stroke="#00f0ff" stroke-width="2" stroke-dasharray="10 6" opacity="0.4"/>
+            <circle cx="200" cy="200" r="172" fill="#060c1c" stroke="#d4af37" stroke-width="5" opacity="0.9"/>
+            
+            <!-- 10 Magnetic Induction Copper Coils -->
+            <g id="reactor-coils">
+              <rect x="188" y="18" width="24" height="34" rx="3" fill="#d47a22" stroke="#ffb142" stroke-width="2"/>
+              <rect x="188" y="18" width="24" height="34" rx="3" fill="#d47a22" stroke="#ffb142" stroke-width="2" transform="rotate(36, 200, 200)"/>
+              <rect x="188" y="18" width="24" height="34" rx="3" fill="#d47a22" stroke="#ffb142" stroke-width="2" transform="rotate(72, 200, 200)"/>
+              <rect x="188" y="18" width="24" height="34" rx="3" fill="#d47a22" stroke="#ffb142" stroke-width="2" transform="rotate(108, 200, 200)"/>
+              <rect x="188" y="18" width="24" height="34" rx="3" fill="#d47a22" stroke="#ffb142" stroke-width="2" transform="rotate(144, 200, 200)"/>
+              <rect x="188" y="18" width="24" height="34" rx="3" fill="#d47a22" stroke="#ffb142" stroke-width="2" transform="rotate(180, 200, 200)"/>
+              <rect x="188" y="18" width="24" height="34" rx="3" fill="#d47a22" stroke="#ffb142" stroke-width="2" transform="rotate(216, 200, 200)"/>
+              <rect x="188" y="18" width="24" height="34" rx="3" fill="#d47a22" stroke="#ffb142" stroke-width="2" transform="rotate(252, 200, 200)"/>
+              <rect x="188" y="18" width="24" height="34" rx="3" fill="#d47a22" stroke="#ffb142" stroke-width="2" transform="rotate(288, 200, 200)"/>
+              <rect x="188" y="18" width="24" height="34" rx="3" fill="#d47a22" stroke="#ffb142" stroke-width="2" transform="rotate(324, 200, 200)"/>
+            </g>
+
+            <!-- Inner Turbine Ring -->
+            <circle cx="200" cy="200" r="130" fill="none" stroke="#00f0ff" stroke-width="4" stroke-dasharray="16 8"/>
+            <circle cx="200" cy="200" r="105" fill="#040916" stroke="#00f0ff" stroke-width="2"/>
+
+            <!-- Rotating Turbine Fins -->
+            <g id="reactor-inner-blades" style="transform-origin: 200px 200px; animation: rotate-cw 14s linear infinite;">
+              <line x1="200" y1="95" x2="200" y2="130" stroke="#00f0ff" stroke-width="3"/>
+              <line x1="200" y1="95" x2="200" y2="130" stroke="#00f0ff" stroke-width="3" transform="rotate(45, 200, 200)"/>
+              <line x1="200" y1="95" x2="200" y2="130" stroke="#00f0ff" stroke-width="3" transform="rotate(90, 200, 200)"/>
+              <line x1="200" y1="95" x2="200" y2="130" stroke="#00f0ff" stroke-width="3" transform="rotate(135, 200, 200)"/>
+              <line x1="200" y1="95" x2="200" y2="130" stroke="#00f0ff" stroke-width="3" transform="rotate(180, 200, 200)"/>
+              <line x1="200" y1="95" x2="200" y2="130" stroke="#00f0ff" stroke-width="3" transform="rotate(225, 200, 200)"/>
+              <line x1="200" y1="95" x2="200" y2="130" stroke="#00f0ff" stroke-width="3" transform="rotate(270, 200, 200)"/>
+              <line x1="200" y1="95" x2="200" y2="130" stroke="#00f0ff" stroke-width="3" transform="rotate(315, 200, 200)"/>
+            </g>
+
+            <!-- Luminous Glowing Center Plasma Core -->
+            <circle cx="200" cy="200" r="70" fill="url(#core-glow-gradient)"/>
+            <circle cx="200" cy="200" r="45" fill="#ffffff" filter="drop-shadow(0 0 15px #00f0ff)"/>
+            <circle cx="200" cy="200" r="20" fill="#e0f7ff"/>
+
+            <defs>
+              <radialGradient id="core-glow-gradient" cx="50%" cy="50%" r="50%">
+                <stop offset="0%" stop-color="#ffffff" stop-opacity="1"/>
+                <stop offset="40%" stop-color="#00f0ff" stop-opacity="0.8"/>
+                <stop offset="75%" stop-color="#0077ff" stop-opacity="0.5"/>
+                <stop offset="100%" stop-color="#050a16" stop-opacity="0"/>
+              </radialGradient>
+            </defs>
+          </svg>
+
+          <div class="reactor-click-hint" id="reactor-hint">[ CLICK CORE TO PULSE & OVERCHARGE ]</div>
+        </div>
+
+        <!-- Reactor Telemetry Metric Docks -->
+        <div class="reactor-stats-dock">
+          <div class="reactor-stat-card stark-panel">
+            <span class="reactor-stat-label">OUTPUT ENERGY</span>
+            <div class="reactor-stat-val" id="stat-output">3.2 GW</div>
+            <div class="reactor-stat-bar"><div class="reactor-stat-bar-fill" id="bar-output" style="width: 70%;"></div></div>
+          </div>
+          <div class="reactor-stat-card stark-panel">
+            <span class="reactor-stat-label">CORE TEMPERATURE</span>
+            <div class="reactor-stat-val" id="stat-temp">3,420 K</div>
+            <div class="reactor-stat-bar"><div class="reactor-stat-bar-fill" id="bar-temp" style="width: 48%; background: var(--stark-gold);"></div></div>
+          </div>
+          <div class="reactor-stat-card stark-panel">
+            <span class="reactor-stat-label">RESONANCE FREQUENCY</span>
+            <div class="reactor-stat-val" id="stat-flux">1.21 THz</div>
+            <div class="reactor-stat-bar"><div class="reactor-stat-bar-fill" id="bar-flux" style="width: 82%;"></div></div>
+          </div>
+          <div class="reactor-stat-card stark-panel">
+            <span class="reactor-stat-label">PLASMA HARMONIC</span>
+            <div class="reactor-stat-val" id="stat-status">STABLE</div>
+            <div class="reactor-stat-bar"><div class="reactor-stat-bar-fill" id="bar-status" style="width: 100%;"></div></div>
+          </div>
+        </div>
+
+        <div style="margin-top: 2rem;">
+          <button class="btn-stark btn-stark-primary" id="btn-overcharge-core">
+            <span>⚡ SURGE OVERCHARGE</span>
+          </button>
+          <button class="btn-stark btn-stark-outline" id="btn-stabilize-core">
+            <span>STABILIZE CORE</span>
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- 4. FLIGHT TELEMETRY & SIMULATOR SECTION -->
+    <section class="section-container" id="flight">
+      <div class="section-header-block">
+        <span class="hud-tag">SUPERSONIC AERODYNAMICS</span>
+        <h2 class="section-title">FLIGHT SYSTEM & RADAR HUD</h2>
+        <p class="section-subtitle">
+          Vectored twin-boot thruster arrays and stabilization flaps deliver Mach 3+ sustained supersonic velocity with full artificial horizon gyro feedback.
+        </p>
+      </div>
+
+      <div class="flight-grid">
+        <!-- Left: Gyroscope Artificial Horizon -->
+        <div class="flight-telemetry-panel stark-panel">
+          <div class="hud-tag" style="margin-bottom: 1rem;">ATTITUDE GYRO // PITCH & ROLL</div>
+          
+          <div class="hud-horizon-display" id="horizon-display">
+            <div class="horizon-pitch-line" id="horizon-pitch"></div>
+            <div class="horizon-ladder">
+              <div class="ladder-bar"></div>
+              <div class="ladder-bar wide"></div>
+              <div class="ladder-bar"></div>
+              <div class="ladder-bar wide"></div>
+              <div class="ladder-bar"></div>
+            </div>
+            <div class="reticle-center-cross"></div>
+          </div>
+
+          <div class="flight-readouts-row">
+            <div class="flight-metric-box">
+              <span class="flight-metric-lbl">AIRSPEED</span>
+              <div class="flight-metric-num" id="metric-speed">MACH 1.8</div>
+            </div>
+            <div class="flight-metric-box">
+              <span class="flight-metric-lbl">ALTITUDE</span>
+              <div class="flight-metric-num" id="metric-alt">14,250 FT</div>
+            </div>
+            <div class="flight-metric-box">
+              <span class="flight-metric-lbl">G-FORCE</span>
+              <div class="flight-metric-num" id="metric-g">3.4 G</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right: Tactical Radar HUD & Modes -->
+        <div class="radar-panel stark-panel">
+          <div class="hud-tag">TACTICAL TARGET ACQUISITION RADAR</div>
+
+          <div class="radar-scope" id="radar-scope">
+            <div class="radar-sweep-beam"></div>
+            <div class="radar-blip blip-1" title="Target #1"></div>
+            <div class="radar-blip blip-2" title="Target #2"></div>
+            <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 4px; height: 4px; background: #fff; border-radius: 50%;"></div>
+          </div>
+
+          <div class="flight-modes-selector">
+            <button class="flight-mode-btn active" data-mode="HOVER">HOVER</button>
+            <button class="flight-mode-btn" data-mode="SUPERSONIC">SUPERSONIC</button>
+            <button class="flight-mode-btn" data-mode="STEALTH">STEALTH</button>
+            <button class="flight-mode-btn" data-mode="COMBAT">COMBAT</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 5. TONY STARK ARMOR DATABASE & SPECIFICATIONS -->
+    <section class="section-container" id="about">
+      <div class="section-header-block">
+        <span class="hud-tag">STARK ARCHIVES</span>
+        <h2 class="section-title">ARMOR EVOLUTION LINEAGE</h2>
+        <p class="section-subtitle">
+          From the caves of Afghanistan to the defense of Earth: Stark Industries continuous technological breakthroughs in powered armor engineering.
+        </p>
+      </div>
+
+      <div class="timeline-grid">
+        <div class="timeline-card stark-panel">
+          <div class="timeline-mark">MARK I</div>
+          <div class="timeline-year">2008 // PROTOTYPE</div>
+          <p class="timeline-desc">Hand-hammered iron chassis forged under duress. First practical miniaturized arc reactor and pneumatic flamethrowers.</p>
+        </div>
+        <div class="timeline-card stark-panel">
+          <div class="timeline-mark">MARK III</div>
+          <div class="timeline-year">2008 // GOLD-TITANIUM</div>
+          <p class="timeline-desc">Solved high-altitude icing with gold-titanium metallurgy. Iconic crimson and gold styling, integrated J.A.R.V.I.S. HUD.</p>
+        </div>
+        <div class="timeline-card stark-panel" style="border-top-color: var(--arc-cyan);">
+          <div class="timeline-mark">MARK VII</div>
+          <div class="timeline-year">2012 // DEPLOYMENT POD</div>
+          <p class="timeline-desc">Rapid deployment pod with dual homing wrist bands, heavy anti-chitauri laser munitions, and high-thrust combat envelope.</p>
+        </div>
+        <div class="timeline-card stark-panel">
+          <div class="timeline-mark">MARK LXXXV</div>
+          <div class="timeline-year">2023 // NANO-TECH</div>
+          <p class="timeline-desc">Full molecular nanite crystallization. Infinite weapon manifestations, lightning absorption refocuser, energy energy shields.</p>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- ASSET SWAP / CUSTOM IMAGE MANAGER MODAL -->
+  <div class="modal-backdrop" id="asset-modal">
+    <div class="modal-content stark-panel">
+      <div class="modal-header">
+        <div>
+          <span class="hud-tag">ASSET MANAGEMENT</span>
+          <h3 style="font-family: var(--font-hud); color: #fff; margin-top: 0.2rem;">CUSTOM SUIT VISUAL ASSETS</h3>
+        </div>
+        <button class="modal-close-btn" id="close-asset-modal">✕</button>
+      </div>
+
+      <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 1.5rem;">
+        You can replace the default Iron Man assets at any time by dropping your own image files below, or placing them inside the <code>assets/</code> folder as <code>hero-ironman.png</code> and <code>armor-ironman.jpg</code>.
+      </p>
+
+      <div class="asset-drop-grid">
+        <!-- Hero Image Drop -->
+        <label class="drop-zone" id="drop-hero">
+          <input type="file" id="input-hero-file" accept="image/*" style="display: none;">
+          <div class="drop-icon">🛸</div>
+          <div class="drop-title">IMAGE 1: HERO SUIT</div>
+          <div class="drop-desc">Full-body flying with repulsors (PNG or JPG)</div>
+          <span class="hud-tag" style="margin-top: 0.8rem;">CLICK TO BROWSE</span>
+        </label>
+
+        <!-- Armor Image Drop -->
+        <label class="drop-zone" id="drop-armor">
+          <input type="file" id="input-armor-file" accept="image/*" style="display: none;">
+          <div class="drop-icon">🛡️</div>
+          <div class="drop-title">IMAGE 2: ARMOR CLOSE-UP</div>
+          <div class="drop-desc">Close-up flight chassis for showcase (PNG or JPG)</div>
+          <span class="hud-tag" style="margin-top: 0.8rem;">CLICK TO BROWSE</span>
+        </label>
+      </div>
+
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 1rem;">
+        <button class="btn-stark btn-stark-outline" id="btn-reset-assets">
+          <span>RESTORE DEFAULT ASSETS</span>
+        </button>
+        <button class="btn-stark btn-stark-cyan" id="btn-save-assets">
+          <span>APPLY ASSETS</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- FOOTER -->
+  <footer class="stark-footer">
+    <div class="footer-content">
+      <div class="footer-brand">
+        <strong>STARK INDUSTRIES</strong> &bull; ADVANCED RESEARCH PROJECTS &bull; MALIBU, CA
+      </div>
+      <div class="footer-telemetry">
+        <span>SECURITY CLEARANCE: TACTICAL LEVEL 8</span> &bull; 
+        <span>ENCRYPTION: 4096-BIT QUANTUM</span>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Scripts -->
+  <script src="audio.js"></script>
+  <script src="particles.js"></script>
+  <script src="script.js"></script>
+</body>
+</html>
